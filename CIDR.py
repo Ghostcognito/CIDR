@@ -47,7 +47,8 @@ def intBinary(inputIPAddr):
     return(IP)
 
 def binaryToNum(inputBinaryNum):
-    """Converts binary numbers to base 10"""
+    """Converts a list of binary numbers to base 10 e.g.
+    ['11111111', '11110000', '00000000', '00000000'] will return '255.240.0.0'"""
     subnet=[]
     # must be formated not to have any leading zeroes e.g. '01100100' won't work
     for i in inputBinaryNum:
@@ -165,8 +166,37 @@ def ipCIDRCombo():
     print(formatedIPAndCIDR)
     return(binaryToNum(formatedIPAndCIDR))
 
+def isPowerOfTwo(x):
+	while(x%2==0 and x > 1):
+		x /= 2
+	return(x==1)
+
+def singleBinaryToNum(inputNum):
+    inputNum = str(inputNum)
+    inputNum = int(inputNum, 2)
+    return(inputNum)
 
 def howManyHosts(numberOfHosts):
-    """This will work out the subnets for a given amount of hosts"""
+    """This works out the number subnets you will need
+    for a given amount of hosts. This takes into consideration the
+    subnet=n-2, so you don't need to subtract 2 from the returned value."""
+    numberOfHosts = numberOfHosts+2
+    numberOfHosts = '%0*d' % (1, int(bin(numberOfHosts)[2:]))
+    if isPowerOfTwo(singleBinaryToNum(numberOfHosts)) == True:
+        print("You will need a subnet that can support at least",str(singleBinaryToNum(numberOfHosts)),"hosts.")
+    else:
+        numberOfHosts = int(numberOfHosts)
+        numberOfHosts = singleBinaryToNum(numberOfHosts)*2**1
+        numberOfHosts = '%0*d' % (1, int(bin(numberOfHosts)[2:]))
+        numberOfHosts = str(numberOfHosts)
+        numberOfHosts = list(numberOfHosts)
+        listNumOfHosts=[]
+        for i in range(0,len(numberOfHosts)):
+            listNumOfHosts.append('0')
+        listNumOfHosts[0]='1'
+        listNumOfHosts = ''.join(listNumOfHosts)
+        listNumOfHosts = int(listNumOfHosts)
+        print("You will need a subnet that can support at least",str(singleBinaryToNum(listNumOfHosts)),"hosts.")
+        
     
 
