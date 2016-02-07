@@ -2,6 +2,7 @@
 # By Ghostcognito
 # CIDR will be displayed after the IP address in this format [X.X.X.X]/CIDR
 # The CIDR will be between 1-30
+# All you need to know about IPv4 addresses NO IPv6 here.
 
 import re
 
@@ -66,13 +67,15 @@ def ipClasses():
     outputIPVal_4 = int(outputIP[3])
     # it must be converted to an int
     if outputIPVal_1 in range(1, 127):
-        print('%s is a class A address.'%(inputIP))
+        print('%s is a class A address. /8'%(inputIP))
     elif outputIPVal_1 in range(128, 192):
-        print('%s is a class B address.'%(inputIP))
+        print('%s is a class B address. /16'%(inputIP))
     elif outputIPVal_1 in range(192, 224):
-        print('%s is a class C address.'%(inputIP))
-    elif outputIPVal_1 in range(240, 255):
-        print('%s is a class D address.'%(inputIP))
+        print('%s is a class C address. /24'%(inputIP))
+    elif outputIPVal_1 in range(224, 239):
+        print('%s is a class D address. N/A'%(inputIP))
+    elif outputIPVal_1 in range(240, 256):
+        print('%s is a class E address. N/A'%(inputIP))
     else:
         print('%s is a non classable IP address.'%(inputIP))
 
@@ -85,19 +88,19 @@ def ipClassesPrivate():
     outputIPVal_3 = int(outputIP[2])
     outputIPVal_4 = int(outputIP[3])
     if outputIPVal_1 == 10 and outputIPVal_2:
-        print('%s is a class A address.'%(inputIP))
-    elif outputIPVal_1 == 127 and outputIPVal_2 in range(16, 31):
-        print('%s is a class B address.'%(inputIP))
+        print('%s is a class A address. /8'%(inputIP))
+    elif outputIPVal_1 == 127 and outputIPVal_2 in range(16, 32):
+        print('%s is a class B address. /12'%(inputIP))
     elif outputIPVal_1 == 192 and outputIPVal_2 == 168:
-        print('%s is a class C address.'%(inputIP))
+        print('%s is a class C address. /16'%(inputIP))
     else:
         print('%s is a non classable IP address.'%(inputIP))
     
 
-def subnetMask():
+def subnetMask(TheSubnet):
     """Converts subnet masks to binary e.g. 255.255.240.0 will be
     ['11111111', '11111111', '11110000', '00000000']"""
-    inputSubnet = input('Enter the subnet ')
+    inputSubnet = TheSubnet
     
     inputSubnet = inputSubnet.split(".")
     subList = []
@@ -109,9 +112,9 @@ def subnetMask():
     elif type(inputSubnet) == int:
         return('%0*d' % (8, int(bin(inputSubnet)[2:])))
 
-def subListMaker():
+def subListMaker(TheSubnet):
     """Takes a subnet mask and returns the CIDR for that mask"""
-    inputSubnetList = subnetMask()
+    inputSubnetList = subnetMask(TheSubnet)
     counter = 0
     subnet = "".join(inputSubnetList)
     #subnet = int(subnet)
@@ -136,8 +139,9 @@ def subCIDR(CIDR):
         CIDRList.append(str(0))
     CIDRList="".join(CIDRList)
     CIDRList=re.findall('........',CIDRList)
-    print(binaryToNum(CIDRList))
+    #print(binaryToNum(CIDRList))
     return(CIDRList)
+
 
 def intSubCIDR(CIDR):
     """Returns the CIDR as an int"""
@@ -167,23 +171,25 @@ def ipCIDRCombo():
     return(binaryToNum(formatedIPAndCIDR))
 
 def isPowerOfTwo(x):
-	while(x%2==0 and x > 1):
-		x /= 2
-	return(x==1)
+    """Checks is a number is a power of 2"""
+    while(x%2==0 and x > 1):
+	    x /= 2
+    return(x==1)
 
 def singleBinaryToNum(inputNum):
+    """Converts a single binary number to an int"""
     inputNum = str(inputNum)
     inputNum = int(inputNum, 2)
     return(inputNum)
 
-def howManyHosts(numberOfHosts):
-    """This works out the number subnets you will need
+def howManyHostsCalc(numberOfHosts):
+    """This works out the size of a subnet you will need
     for a given amount of hosts. This takes into consideration the
-    subnet=n-2, so you don't need to subtract 2 from the returned value."""
+    subnet=n-2, you DON'T need to subtract 2 from the returned value."""
     numberOfHosts = numberOfHosts+2
     numberOfHosts = '%0*d' % (1, int(bin(numberOfHosts)[2:]))
     if isPowerOfTwo(singleBinaryToNum(numberOfHosts)) == True:
-        print("You will need a subnet that can support at least",str(singleBinaryToNum(numberOfHosts)),"hosts.")
+        return(numberOfHosts)
     else:
         numberOfHosts = int(numberOfHosts)
         numberOfHosts = singleBinaryToNum(numberOfHosts)*2**1
@@ -196,7 +202,61 @@ def howManyHosts(numberOfHosts):
         listNumOfHosts[0]='1'
         listNumOfHosts = ''.join(listNumOfHosts)
         listNumOfHosts = int(listNumOfHosts)
-        print("You will need a subnet that can support at least",str(singleBinaryToNum(listNumOfHosts)),"hosts.")
-        
+        return(listNumOfHosts)
+
+def howManyHostSubnet(numberOfHosts):
+    """This will return the most effisient subnet
+    for a given amount of hosts"""
+    hostNumber = howManyHostsCalc(numberOfHosts)
+    hostNumber = str(hostNumber)
+    hostNumber = list(hostNumber)
+    for i in hostNumber:
+        if len(hostNumber) < 32:
+            hostNumber.insert(0,'1')
+    hostNumber = "".join(hostNumber)
+    hostNumber = str(hostNumber)
+    hostNumber = re.findall('........',hostNumber)
+    print('You will need a subnet of %s'%binaryToNum(hostNumber))
+    return(binaryToNum(hostNumber))
+
+def howManyHostCIDR(numberOfHosts):
+    hostNumber = howManyHostSubnet(numberOfHosts)
+    print('You will need a CIDR of %s' % subListMaker(hostNumber))
+    return(subListMaker(hostNumber))
     
 
+def hostCalc(numberOfHosts):
+    amountOfHosts=howManyHostsCalc(numberOfHosts)
+    print('You will need a subnet that can support at least %s hosts'%singleBinaryToNum(amountOfHosts))
+        
+def subnetHostCalc():
+    """Retruns how many hosts a given CIDR can support.
+    You DON'T need to subtract 2 from the returned value"""
+    CIDR = input('Please input the CIDR ')
+    hostCount = []
+    CIDRFormated = subCIDR(CIDR)
+    CIDRFormated = "".join(CIDRFormated)
+    CIDRFormated = CIDRFormated.strip('1')
+    for i in CIDRFormated:
+        hostCount.append('1')
+    hostCount = "".join(hostCount)
+    hostCount = int(hostCount,2)
+    hostCount = hostCount - 2
+    print("This CIDR can support %s hosts."%hostCount)
+
+def subnetCalc():
+    CIDR = input('Please input the CIDR ')
+    CIDRFormated = subCIDR(CIDR)
+    CIDRFormated = "".join(CIDRFormated)
+    CIDRFormated = CIDRFormated.strip('1')
+    CIDRFormated = list(CIDRFormated)
+    CIDRFormated.insert(0,'1')
+    CIDRFormated = "".join(CIDRFormated)
+    subnetCount = int(CIDRFormated,2)
+    count = subnetCount
+    for i in range(0,255, subnetCount):
+        print(subnetCount)
+        subnetCount += count
+    # Add useable range and so that it can print out for diffrnet section in the
+    # octet
+        
