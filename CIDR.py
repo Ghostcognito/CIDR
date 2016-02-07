@@ -1,6 +1,6 @@
 # Ghostcognito's CIDR distiller
 # By Ghostcognito
-# CIDR will be displayed after the IP address in this format [X.X.X.X]/CIDR
+# CIDR will be displayed after the IP address in this format X.X.X.X/CIDR
 # The CIDR will be between 1-30
 # All you need to know about IPv4 addresses NO IPv6 here.
 
@@ -216,16 +216,19 @@ def howManyHostSubnet(numberOfHosts):
     hostNumber = "".join(hostNumber)
     hostNumber = str(hostNumber)
     hostNumber = re.findall('........',hostNumber)
-    print('You will need a subnet of %s'%binaryToNum(hostNumber))
+    print('You will need a subnet mask of %s'%binaryToNum(hostNumber))
     return(binaryToNum(hostNumber))
 
-def howManyHostCIDR(numberOfHosts):
+def howManyHosts(numberOfHosts):
+    """This will print out the subnet mask, CIDR and network IDs for a
+    given amount of hosts"""
     hostNumber = howManyHostSubnet(numberOfHosts)
     print('You will need a CIDR of %s' % subListMaker(hostNumber))
-    return(subListMaker(hostNumber))
+    return(subnetCalc(subListMaker(hostNumber)))
     
 
 def hostCalc(numberOfHosts):
+    """Advises on the size of the subnets you will need"""
     amountOfHosts=howManyHostsCalc(numberOfHosts)
     print('You will need a subnet that can support at least %s hosts'%singleBinaryToNum(amountOfHosts))
         
@@ -244,8 +247,10 @@ def subnetHostCalc():
     hostCount = hostCount - 2
     print("This CIDR can support %s hosts."%hostCount)
 
-def subnetCalc():
-    CIDR = input('Please input the CIDR ')
+def subnetCalc(CIDR):
+    """Only works for the last octet, can't go above 256 hosts"""
+    #CIDR = input('Please input the CIDR ')
+    CIDR = CIDR
     CIDRFormated = subCIDR(CIDR)
     CIDRFormated = "".join(CIDRFormated)
     CIDRFormated = CIDRFormated.strip('1')
@@ -253,10 +258,10 @@ def subnetCalc():
     CIDRFormated.insert(0,'1')
     CIDRFormated = "".join(CIDRFormated)
     subnetCount = int(CIDRFormated,2)
-    count = subnetCount
+    count = 0
     for i in range(0,255, subnetCount):
-        print(subnetCount)
-        subnetCount += count
+        print(count)
+        count += subnetCount
     # Add useable range and so that it can print out for diffrnet section in the
     # octet
         
