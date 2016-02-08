@@ -18,6 +18,13 @@ def spliter(inputIP):
     else:
         return(outputIP)
 
+def singleBinaryToNum(inputNum):
+    """Converts a single binary number to an int"""
+    inputNum = str(inputNum)
+    inputNum = int(inputNum, 2)
+    return(inputNum)
+
+
 def binary(inputIPAddr):
     """This converts the IP address into binary"""
     inputIPAddr = str(inputIPAddr)
@@ -57,44 +64,11 @@ def binaryToNum(inputBinaryNum):
     ".".join(str(i) for i in subnet)
     return(".".join(str(i) for i in subnet))
 
-def ipClasses():
-    """For a given IP will return the public IP class it falls in"""
-    inputIP=input(str('Give me the IP '))
-    outputIP= spliter(inputIP)
-    outputIPVal_1 = int(outputIP[0])
-    outputIPVal_2 = int(outputIP[1])
-    outputIPVal_3 = int(outputIP[2])
-    outputIPVal_4 = int(outputIP[3])
-    # it must be converted to an int
-    if outputIPVal_1 in range(1, 127):
-        print('%s is a class A address. /8'%(inputIP))
-    elif outputIPVal_1 in range(128, 192):
-        print('%s is a class B address. /16'%(inputIP))
-    elif outputIPVal_1 in range(192, 224):
-        print('%s is a class C address. /24'%(inputIP))
-    elif outputIPVal_1 in range(224, 239):
-        print('%s is a class D address. N/A'%(inputIP))
-    elif outputIPVal_1 in range(240, 256):
-        print('%s is a class E address. N/A'%(inputIP))
-    else:
-        print('%s is a non classable IP address.'%(inputIP))
-
-def ipClassesPrivate():
-    """For a given private IP address will return what class it falls in"""
-    inputIP = input(str('Give me the IP '))
-    outputIP= spliter(inputIP)
-    outputIPVal_1 = int(outputIP[0])
-    outputIPVal_2 = int(outputIP[1])
-    outputIPVal_3 = int(outputIP[2])
-    outputIPVal_4 = int(outputIP[3])
-    if outputIPVal_1 == 10 and outputIPVal_2:
-        print('%s is a class A address. /8'%(inputIP))
-    elif outputIPVal_1 == 127 and outputIPVal_2 in range(16, 32):
-        print('%s is a class B address. /12'%(inputIP))
-    elif outputIPVal_1 == 192 and outputIPVal_2 == 168:
-        print('%s is a class C address. /16'%(inputIP))
-    else:
-        print('%s is a non classable IP address.'%(inputIP))
+def isPowerOfTwo(x):
+    """Checks is a number is a power of 2"""
+    while(x%2==0 and x > 1):
+	    x /= 2
+    return(x==1)
     
 
 def subnetMask(TheSubnet):
@@ -170,17 +144,6 @@ def ipCIDRCombo():
     print(formatedIPAndCIDR)
     return(binaryToNum(formatedIPAndCIDR))
 
-def isPowerOfTwo(x):
-    """Checks is a number is a power of 2"""
-    while(x%2==0 and x > 1):
-	    x /= 2
-    return(x==1)
-
-def singleBinaryToNum(inputNum):
-    """Converts a single binary number to an int"""
-    inputNum = str(inputNum)
-    inputNum = int(inputNum, 2)
-    return(inputNum)
 
 def howManyHostsCalc(numberOfHosts):
     """This works out the size of a subnet you will need
@@ -259,8 +222,9 @@ def subnetCalc(CIDR):
     CIDRFormated = "".join(CIDRFormated)
     subnetCount = int(CIDRFormated,2)
     count = 0
-    for i in range(0,255, subnetCount):
-        print(count)
+    print('Network ID -', '-- Useable Range --', '- Broadcast Address')
+    for i in range(0,255, subnetCount): 
+        print((count),'------',(count+1),'--------------------',(count+subnetCount-2),'------',(count+subnetCount-1))
         count += subnetCount
     # Add useable range and so that it can print out for diffrnet section in the
     # octet
